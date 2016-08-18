@@ -1,32 +1,48 @@
 module PageWithPostList
-	include Gizmo::PageMixin
+  include Gizmo::PageMixin
 
-	def valid?
-		has_css?('.parent .left')
-	end
+  def valid?
+    has_css?('.parent .left')
+  end
 
-	def posts_in_list
-		find('.parent .left table').find('tbody').all('tr')
-	end
+  def posts_in_list
+    find('.parent .left table').find('tbody').all('tr')
+  end
 
-	def new_post_link
-		find('.parent .left a[href="/posts/new"]')
-	end
+  def titles_in_list
+    find('.parent .left table').all('.title')
+  end
 
-	def create_post_button
-		find('.actions input[value="Create Post"]')
-	end
+  def contents_in_list
+    find('.parent .left table').all('.content')
+  end
 
-	def notice_message
-		find('#notice').text
-	end
+  def new_post_link
+    find('.parent .left a[href="/posts/new"]')
+  end
 
-	def back_link
-		find('a[href="/posts"]')
-	end
+  def create_post_button
+    find('.actions input[value="Create Post"]')
+  end
 
-	define_action :fill_post do |title, content|
-		fill_in('post_title', with: title)
-		fill_in('post_content', with: content)
-	end
+  def notice_message
+    find('#notice').text
+  end
+
+  def notice_title
+    find('#title').text
+  end
+
+  def notice_content
+    find('#content').text
+  end
+
+  def back_link
+    find('a[href="/posts"]')
+  end
+
+  define_action :fill_post do |title, content|
+    fill_in('post_title', with: title)
+    fill_in('post_content', with: content)
+  end
 end

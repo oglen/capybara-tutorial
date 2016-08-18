@@ -1,92 +1,35 @@
 require 'rails_helper'
 
-sleepSeconds = 0
+posts = [
+    {
+        'title' => 'my first post',
+        'content' => 'I wanna be the full-stack dev'
+    }, {
+        'title' => 'hello world',
+        'content' => 'I wanna be a good dev'
+    }
+]
 
 RSpec.feature 'post feature', type: :feature do
+
   scenario 'create new post' do
     visit '/posts'
-    sleep(sleepSeconds)
+    on_page_with :post_list do |page|
+      expect(page.posts_in_list.length).to eq(0)
 
-    click_link('New Post')
-    fill_in('post_title', with: 'my first post')
-    sleep(sleepSeconds)
-    fill_in('post_content', with: 'I wanna be the full-stack dev')
-    sleep(sleepSeconds)
-    click_button('Create Post')
-    sleep(sleepSeconds)
-    expect(page).to have_content('Title: my first post')
-    expect(page).to have_content('Content: I wanna be the full-stack dev')
-    sleep(sleepSeconds)
-    click_link('Back')
+      posts.each_with_index do |_, i|
+        page.new_post_link.click
+        page.perform :fill_post, posts[i]['title'], posts[i]['content']
+        page.create_post_button.click
+        expect(page.notice_message).to eq('Post was successfully created.')
+        expect(page.notice_title).to eq(posts[i]['title'])
+        expect(page.notice_content).to eq(posts[i]['content'])
+        page.back_link.click
+      end
 
-    sleep(sleepSeconds)
+      page.titles_in_list.each_with_index { |title, i| expect(title.text).to eq(posts[i]['title']) }
+      page.contents_in_list.each_with_index { |content, i| expect(content.text).to eq(posts[i]['content']) }
 
-    click_link('New Post')
-    fill_in('post_title', with: 'my second post')
-    sleep(sleepSeconds)
-    fill_in('post_content', with: 'Scala is the best programing language in the world.')
-    sleep(sleepSeconds)
-    click_button('Create Post')
-    sleep(sleepSeconds)
-    expect(page).to have_content('Title: my second post')
-    expect(page).to have_content('Content: Scala is the best programing language in the world.')
-    sleep(sleepSeconds)
-    click_link('Back')
-
-    sleep(sleepSeconds)
-
-    click_link('Edit', match: :first)
-    sleep(sleepSeconds)
-    fill_in('post_title', with: 'my first post edited')
-    sleep(sleepSeconds)
-    fill_in('post_content', with: 'I wanna be a scala dev')
-    sleep(sleepSeconds)
-    click_button('Update Post')
-    sleep(sleepSeconds)
-    expect(page).to have_content('Title: my first post edited')
-    expect(page).to have_content('Content: I wanna be a scala dev')
-    click_link('Back')
-
-    sleep(sleepSeconds)
-
-    all('a', :text => 'Edit')[1].click
-    fill_in('post_title', with: 'my second post edited')
-    sleep(sleepSeconds)
-    fill_in('post_content', with: 'Scala is the best programing language in the universe.')
-    sleep(sleepSeconds)
-    click_button('Update Post')
-    sleep(sleepSeconds)
-    expect(page).to have_content('Title: my second post edited')
-    expect(page).to have_content('Content: Scala is the best programing language in the universe.')
-
-    sleep(sleepSeconds)
-
-    visit '/posts'
-    sleep(sleepSeconds)
-    expect(page).to have_content('my first post edited')
-    expect(page).to have_content('I wanna be a scala dev')
-    expect(page).to have_content('my second post edited')
-    expect(page).to have_content('Scala is the best programing language in the universe.')
-    sleep(sleepSeconds)
-
-    click_link('Destroy', match: :first)
-    sleep(sleepSeconds)
-    page.driver.browser.switch_to.alert.accept
-    sleep(sleepSeconds)
-    expect(page).to have_content('Post was successfully destroyed.')
-    expect(page).not_to have_content('my first post edited')
-    expect(page).not_to have_content('I wanna be a scala dev')
-
-    sleep(sleepSeconds)
-
-    visit '/posts'
-    expect(page).not_to have_content('Post was successfully destroyed.')
-    click_link('Destroy', match: :first)
-    sleep(sleepSeconds)
-    page.driver.browser.switch_to.alert.accept
-    sleep(sleepSeconds)
-    expect(page).to have_content('Post was successfully destroyed.')
-    expect(page).not_to have_content('my second post edited')
-    expect(page).not_to have_content('Scala is the best programing language in the universe.')
+    end
   end
 end
